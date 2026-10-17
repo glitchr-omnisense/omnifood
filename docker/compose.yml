@@ -1,4 +1,4 @@
-# glitchr/omnifood with every platform package, your keys in .env:
+# omniscient/omnifood with every platform package, your keys in .env:
 #
 #   cp .env.dist .env                                            # fill in the keys at hand
 #   docker compose run --rm omnifood platforms                   # which platforms are installed and configured
@@ -19,7 +19,7 @@ name: omnifood-harness
 services:
   omnifood:
     build: .
-    image: glitchr/omnifood-harness
+    image: omniscient/omnifood-harness
     env_file:
       - path: .env
         required: false

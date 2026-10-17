@@ -81,5 +81,5 @@ public function ubereats(Request $request, NotifiableInterface $ubereats, Messag
 Answer fast and work later (Messenger): see [webhooks](webhooks.md).
 
 The bundle's components - `symfony/config`, `symfony/dependency-injection`, `symfony/http-kernel` -
-are not required by `glitchr/omnifood`: the application has them, and nothing of them is loaded
+are not required by `omniscient/omnifood`: the application has them, and nothing of them is loaded
 outside Symfony.

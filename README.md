@@ -1,8 +1,14 @@
-# glitchr/omnifood
+# omniscient/omnifood
 
 One contract for the restaurant platforms - the delivery orders (Uber Eats, Deliveroo, Just Eat)
 and the table reservations (TheFork, Zenchef) - the Omnibus of the kitchen, beside
-glitchr/omnitrade (payments), glitchr/omnibus (shipping) and glitchr/omnipost (publishing).
+omniscient/omnitrade (payments), omniscient/omnibus (shipping) and omniscient/omnipost
+(publishing).
+
+Published as `omniscient/omnifood` (formerly `glitchr/omnifood`, which this package replaces: a
+`composer.json` that still requires the old name keeps resolving to this package and never installs
+both). `omniscient/` is the vendor of every family's core, the providers keep `omnifood/`, the
+namespace `Omnifood\` and the GitHub repositories do not change.
 
 ```php
 // A webhook: its raw body and its headers checked, read, the same shape whatever the platform.
@@ -59,7 +65,7 @@ from the platform's public documentation and tested against recorded answers (`M
 ## Install
 
 ```sh
-composer require glitchr/omnifood omnifood/ubereats omnifood/deliveroo omnifood/justeat omnifood/thefork
+composer require omniscient/omnifood omnifood/ubereats omnifood/deliveroo omnifood/justeat omnifood/thefork
 ```
 
 ## Plain PHP
@@ -137,7 +143,7 @@ More in [docs/](docs/index.md).
 
 ## Responsibility
 
-`glitchr/omnifood` and its `omnifood/*` providers are independent, unofficial clients: none is
+`omniscient/omnifood` and its `omnifood/*` providers are independent, unofficial clients: none is
 affiliated with, endorsed by or sponsored by the services it reaches. Each service keeps its own
 terms (partner agreements and approvals, keys, rate limits, how orders and customer data may be
 used), named with a link in the "Responsibility" section of the README of each provider that reaches

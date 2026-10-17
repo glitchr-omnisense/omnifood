@@ -1,7 +1,7 @@
 # Installation
 
 ```sh
-composer require glitchr/omnifood
+composer require omniscient/omnifood
 composer require omnifood/ubereats omnifood/deliveroo omnifood/justeat omnifood/thefork omnifood/zenchef
 ```
 
