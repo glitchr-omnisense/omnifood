@@ -1,5 +1,5 @@
 {
-    "name": "omniscient/omnifood",
+    "name": "omnisense/omnifood",
     "type": "library",
     "description": "Omnifood: one contract for the restaurant platforms - delivery orders (Uber Eats, Deliveroo, Just Eat) and table reservations (TheFork, Zenchef) - their menus, their stores, their webhooks, and its Symfony bundle.",
     "keywords": ["restaurant", "food", "delivery", "orders", "reservations", "menu", "ubereats", "deliveroo", "justeat", "thefork", "zenchef", "omnifood"],
@@ -17,6 +17,7 @@
         "symfony/http-kernel": "^6.4|^7.0|^8.0"
     },
     "replace": {
+        "omniscient/omnifood": "self.version",
         "glitchr/omnifood": "self.version"
     },
     "suggest": {

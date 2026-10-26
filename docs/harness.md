@@ -4,7 +4,7 @@
 them with real keys.
 
 ```sh
-cd vendor/omniscient/omnifood/docker   # or the checkout's docker/
+cd vendor/omnisense/omnifood/docker   # or the checkout's docker/
 cp .env.dist .env                   # fill in the keys at hand
 docker compose run --rm omnifood platforms
 ```

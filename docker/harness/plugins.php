@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Every platform package: its slug (omnifood/<slug>, github.com/glitchr-studio/omnifood-<slug>),
+ * Every platform package: its slug (omnifood/<slug>, github.com/glitchr-omnisense/omnifood-<slug>),
  * its tests' namespace and its factory class.
  */
 return [
