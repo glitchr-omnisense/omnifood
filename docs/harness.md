@@ -1,7 +1,14 @@
-# Harness
+---
+title: The Docker harness
+order: 70
+---
+
+# The Docker harness
 
 `docker/` in this package runs it with every `omnifood/*` platform installed and a console to call
-them with real keys.
+them with real keys. The image is `omnisense/omnifood-harness` (PHP 8.4, Composer); the harness
+writes its `composer.json` and `phpunit.xml` into a volume (`docker/harness/setup.php`) and installs
+them when they change.
 
 ```sh
 cd vendor/omnisense/omnifood/docker   # or the checkout's docker/
@@ -25,6 +32,23 @@ The platforms come from GitHub (branch 1.x), or from the checkouts beside the co
 | `refresh <platform>`, `authorize <platform> <redirect-uri>` | tokens |
 | `bare` | plain PHP: the registry built by hand, an order read from a recorded answer, what PHP loaded |
 | `test` | every package's tests |
+
+## Keys
+
+`docker/.env.dist` lists every variable the console reads (`docker/harness/config/platforms.php`):
+`UBEREATS_CLIENT_ID`, `UBEREATS_CLIENT_SECRET`, `UBEREATS_STORE_ID`, `UBEREATS_SANDBOX`;
+`DELIVEROO_CLIENT_ID`, `DELIVEROO_CLIENT_SECRET`, `DELIVEROO_BRAND_ID`, `DELIVEROO_SITE_ID`,
+`DELIVEROO_MENU_ID`, `DELIVEROO_WEBHOOK_SECRET`, `DELIVEROO_SANDBOX`, `DELIVEROO_TABLET`;
+`JUSTEAT_API_KEY`, `JUSTEAT_RESTAURANT`, `JUSTEAT_WEBHOOK_KEY`, `JUSTEAT_WEBHOOK_SECRET`,
+`JUSTEAT_CURRENCY`, `JUSTEAT_TIMEZONE`; `THEFORK_CLIENT_ID`, `THEFORK_CLIENT_SECRET`,
+`THEFORK_RESTAURANT_ID`, `THEFORK_WEBHOOK_TOKEN`; `ZENCHEF_TOKEN`, `ZENCHEF_RESTAURANT_ID`,
+`ZENCHEF_BASE_URI`. Every installed platform is built whatever is set - `capabilities` and
+`menu:push --validate` need no key - and `platforms` lists the variables each one still needs.
+The console passes no Zenchef `headers`, so Zenchef's client is not callable from it.
+
+A command that fails prints the exception's message: exit code 2 for an `InvalidConfigException`
+(a key missing), 1 for any other Omnifood exception; an `InvalidMenuException` lists its
+violations ("Refused before anything was sent").
 
 ## Bare: no bundle, no container
 
@@ -53,4 +77,15 @@ Classes of a framework (DependencyInjection, Config, HttpKernel, HttpFoundation,
 ```
 
 `bare --json` prints the same whole, every class and file loaded: `Tests/BareTest.php` runs it
-in a process of its own and checks the list.
+in a process of its own and checks the list. (Output above run again on 2026-10-26, identical.)
+
+## Running a script of your own
+
+The entrypoint runs `php` as it is, with the harness's autoloader at `/harness/vendor/autoload.php`:
+
+```sh
+docker compose run --rm -v "$PWD/scratch:/scratch" omnifood php /scratch/try.php
+```
+
+The examples of this manual were run that way. `docker compose run --rm omnifood test` runs every
+package's tests in one PHPUnit run (89 tests on 2026-10-26).
