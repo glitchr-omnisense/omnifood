@@ -54,15 +54,9 @@ The `Notification`'s fields are in [Concepts](concepts.md#notifications).
 |---|---|---|---|
 | Uber Eats | `X-Uber-Signature`: lowercase hex HMAC-SHA256 of the body | `client_secret` | the event and the order's id: `order($n->reference)` |
 | Deliveroo | `X-Deliveroo-Hmac-Sha256`: hex HMAC-SHA256 of `X-Deliveroo-Sequence-Guid`, a space and the body | `webhook_secret` | the whole order; the rider's status; the menu's upload result |
-| Just Eat | `Authorization` equal to the key given to JET; `X-JET-Connect-Hash` (`signature=` base64 HMAC-SHA256 of the body) | `webhook_key`, `webhook_secret` (one at least) | the whole order; cancellations, the driver, the restaurant set offline, the backup flow |
+| Just Eat | `Authorization` equal to the key given to JET; `X-JET-Connect-Hash` (`signature=` base64 HMAC-SHA256 of the body) | `webhook_key`, `webhook_secret` (one at least; the secret alone refuses a webhook without the hash) | the whole order; cancellations, the driver, the restaurant set offline, the backup flow |
 | TheFork | the token put in the URL given to TheFork, passed among the headers as `token` | `webhook_token` | the entity and its id: `reservation($n->reference)` |
 | Zenchef | refused: not public | - | - |
-
-> [!WARNING]
-> Known defect: with only `webhook_secret` set for Just Eat, the hash is checked on order bodies
-> and on bodies that carry an `X-JET-Connect-Hash` header; a cancellation, driver, offline or
-> backup-flow body sent without that header is accepted unchecked, where every webhook should be
-> authenticated. Set `webhook_key` too.
 
 ## Events, ids and statuses
 

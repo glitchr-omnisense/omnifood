@@ -20,12 +20,11 @@ Every exception Omnifood throws on purpose implements `Omnifood\Exception\Omnifo
 Outside the family's exceptions: `Hours`' constructor throws `\InvalidArgumentException` for a
 day, a time or a range it cannot read ([Concepts](concepts.md#hours)); TheFork's
 `updateReservation()` a `\InvalidArgumentException` for a reservation without a reference, and
-`pushAvailability()` for an entry that is not a `Slot`.
+`pushAvailability()` for an entry that is not a `Slot`, `createReservation()` for a national
+phone number in no country it knows ([omnifood/thefork](https://github.com/glitchr-omnisense/omnifood-thefork)).
 
-> [!WARNING]
-> Known defect: an option that PHP's date and time zone classes cannot read - Just Eat's
-> `timezone`, Uber Eats' and TheFork's `token_expires_at` - throws PHP's own `\Exception` from the
-> factory, where an `InvalidConfigException` is expected.
+An option a factory cannot read as a date or a time zone - Just Eat's `timezone`, Uber Eats' and
+TheFork's `token_expires_at` - is an `InvalidConfigException` (PHP's own exception as its previous).
 
 ## ProviderException
 
@@ -56,18 +55,14 @@ Eats; the four others follow the same code):
 | another 4xx or 5xx | `ProviderException` | its message, else `[ubereats] HTTP 500.` |
 | a network failure | `ProviderException`, status `null` | `[ubereats] Uber could not be reached: Connection refused` |
 | a token answer without a token | `ProviderException` | `[ubereats] No token in Uber's answer.` |
+| a 2xx whose body is not JSON (a proxy's page) | `ProviderException`, its status | `[ubereats] An answer that is not JSON (HTTP 200).` |
 
 The message and the code are read from each platform's error shape: Uber's `{code, message}`,
 Deliveroo's `{error: {code, message}}`, JET's `{success: false, error_message}`, `{message}` or
 `{fault: {errors: [...]}}`, TheFork's `{data: {code}, error, statusCode}` or `{message}`, the
 OAuth endpoints' `{error, error_description}`. A JET answer with `"success": false` is a
-`ProviderException` whatever its status.
-
-> [!WARNING]
-> Known defect: a 2xx answer whose body is not JSON (an HTML page from a proxy) is read as an
-> empty answer by every package, where a `ProviderException` is expected. Uber Eats' `order()`
-> then returns an `Order` with an empty reference and the status `unknown`, with a PHP warning
-> (checked on a recorded answer).
+`ProviderException` whatever its status; so is a 2xx answer whose body is not JSON, on every
+platform, where it was read as an empty answer.
 
 ## What to catch where
 

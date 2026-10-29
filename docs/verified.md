@@ -35,10 +35,10 @@ harness the same day.
   (`sandbox: true`) to start from.
 - Zenchef's API is documented on request only: `omnifood/zenchef` holds the credentials and a
   configured client, and refuses every reservation call.
-- There is no conformance suite: the packages share their rules by convention, and the defects
+- There is no conformance suite: the packages share their rules by convention. The defects
   found while writing these manuals (a 2xx body that is not JSON read as an empty answer, Just
-  Eat's webhooks unchecked with only an HMAC secret, TheFork's phone numbers) are flagged where
-  the behaviour is described.
+  Eat's webhooks unchecked with only an HMAC secret, TheFork's phone numbers, the factories' date
+  options) are fixed since, each with its test in its package.
 - The [Laravel](laravel.md) page was written from the registry's API, not run in a Laravel
   application.
 
