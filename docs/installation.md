@@ -19,13 +19,7 @@ Take only the platforms the restaurant is on.
 - Each platform package requires `omnisense/omnifood` (1.x) and `symfony/http-client` (^6.4, ^7.0
   or ^8.0), a library that stands alone and loads no framework.
 - `ext-json` (always present since PHP 8.0). The [menu validator](menu.md#checking-it) and
-  Deliveroo's menu check call `mb_strlen()`: `ext-mbstring` must be enabled, though no
-  `composer.json` requires it.
-
-> [!WARNING]
-> Known defect: `Validator` and `DeliverooPlatform::pushMenu()` call `mb_strlen()` while no package
-> requires `ext-mbstring` (nor a polyfill), where a PHP built without it fails with an undefined
-> function only when a menu is checked.
+  Deliveroo's menu check call `mb_strlen()`: `omnisense/omnifood` requires `ext-mbstring`.
 
 Omnifood runs the same in plain PHP, in a worker, in Laravel or Slim, and in Symfony, where a
 bundle does the wiring ([Symfony](symfony.md)).
