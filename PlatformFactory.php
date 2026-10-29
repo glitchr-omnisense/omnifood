@@ -2,6 +2,7 @@
 
 namespace Omnifood;
 
+use Omnifood\Http\Redaction;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -28,10 +29,15 @@ abstract class PlatformFactory implements PlatformFactoryInterface
 
     public function create(array $options = []): PlatformInterface
     {
-        $config = $this->createConfig($options);
-        $config->validateNotEmpty($config->get('omnifood.required_options', []));
+        try {
+            $config = $this->createConfig($options);
+            $config->validateNotEmpty($config->get('omnifood.required_options', []));
 
-        return $this->build($config);
+            return $this->build($config);
+        } catch (\Throwable $e) {
+            // The options hold the credentials: no trace of the failure keeps them in its arguments.
+            throw Redaction::withoutArguments($e);
+        }
     }
 
     public function createConfig(array $options = []): Config

@@ -1,8 +1,10 @@
 <?php
 
-namespace Omnifood\Tests;
+namespace Omnifood\Tests\Http;
 
+use Omnifood\Exception\InvalidConfigException;
 use Omnifood\Http\Redaction;
+use Omnifood\Tests\StubFactory;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -67,6 +69,18 @@ final class RedactionTest extends TestCase
             foreach ($one->getTrace() as $frame) {
                 self::assertArrayNotHasKey('args', $frame);
             }
+        }
+    }
+
+    public function testAFactoryThatFailsKeepsNoOptionInItsTrace(): void
+    {
+        try {
+            (new StubFactory())->create(['key' => '', 'api_secret' => 'factory-secret-864209']);
+            self::fail('no exception');
+        } catch (InvalidConfigException $e) {
+            self::assertNotEmpty($e->getTrace());
+            self::assertStringNotContainsString('factory-secret-864209', print_r($e->getTrace(), true));
+            self::assertStringNotContainsString('factory-secret-864209', $e->getTraceAsString());
         }
     }
 
