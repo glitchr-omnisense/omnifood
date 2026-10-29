@@ -41,7 +41,7 @@ try {
     $e->status;         // the HTTP status, null when the platform could not be reached
     $e->providerCode;   // the platform's own error code, when it gave one; else null
     $e->getMessage();   // "[ubereats] <the platform's message>"
-    $e->getPrevious();  // the HTTP client's exception, for a network failure
+    $e->getPrevious();  // a copy of the HTTP client's exception, for a network failure
 }
 ```
 
@@ -63,6 +63,17 @@ Deliveroo's `{error: {code, message}}`, JET's `{success: false, error_message}`,
 OAuth endpoints' `{error, error_description}`. A JET answer with `"success": false` is a
 `ProviderException` whatever its status; so is a 2xx answer whose body is not JSON, on every
 platform, where it was read as an empty answer.
+
+## No secret in a failure
+
+What a platform throws keeps the request's secrets out, for a log that writes the whole chain,
+arguments included (`zend.exception_ignore_args` off). The HTTP client's message quotes the URL
+called: in the `ProviderException`'s message its key parameters, a password in its user part and every secret
+of the request (a key, a password, a bearer or basic credential) are masked as `***`
+(`Omnifood\Http\Redaction::text()`). The previous exception is a copy of the client's
+(`Redaction::copy()`: the same class and code, that message, its own previous copied the same
+way, without the response or request a client's exception holds), and no trace of the chain keeps
+its arguments, where the options, headers and body stood (`Redaction::withoutArguments()`).
 
 ## What to catch where
 
