@@ -60,6 +60,9 @@ The whole tree, from the bundle's `configure()`:
 | `omnifood.platforms` | map, keyed by the platform's name | `{}` | the restaurant's platforms |
 | `omnifood.platforms.<name>.factory` | string, required, not empty | - | a factory's name: `ubereats`, `deliveroo`, `justeat`, `thefork`, `zenchef` ([platforms](index.md#platforms)), or an application's own factory's `getName()` |
 | `omnifood.platforms.<name>.options` | any value (a map) | `[]` | handed as they are to the factory's `create()`: the platform's options ([Configuration](configuration.md#every-platforms-options)) |
+| `omnifood.platforms.<name>.policy` | any value (a map), optional | - | a tightening of the platform's usage policy, in omnisense/contracts' schema: never looser ([Usage policies](policies.md)) |
+| `omnifood.platforms.<name>.usage` | any value (a map), optional | - | what the site is: `{commercial: true, open_source: false, contract: true}`; a use the policy forbids fails when the platform is guarded |
+| `omnifood.limiter` | a service id, or `null` | `null` | an `Omnisense\Contracts\Policy\RateLimiterInterface` every process shares (omnibridge/symfony's over symfony/rate-limiter); `null`: the registry's own, in memory |
 
 The options are not validated when the container compiles - the tree accepts any value - and no
 platform declares a required option: a key missing shows when a call needs it, as an

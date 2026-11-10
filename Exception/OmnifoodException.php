@@ -2,7 +2,9 @@
 
 namespace Omnifood\Exception;
 
-/** Every exception Omnifood throws. */
-interface OmnifoodException extends \Throwable
+use Omnisense\Contracts\Exception\ExceptionInterface;
+
+/** Every exception Omnifood throws; omnisense/contracts' ExceptionInterface catches them too. */
+interface OmnifoodException extends ExceptionInterface
 {
 }

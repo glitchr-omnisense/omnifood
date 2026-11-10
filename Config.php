@@ -6,35 +6,29 @@ use Omnifood\Exception\InvalidConfigException;
 
 /**
  * A platform's configuration while its factory builds it: the options given,
- * the factory's defaults under them, and the keys that must be filled.
- *
- * @extends \ArrayObject<string, mixed>
+ * the factory's defaults under them, and the keys that must be filled -
+ * omnisense/contracts' Config, with omnifood's prefix ("omnifood.factory_name",
+ * "omnifood.backoff"...) and its InvalidConfigException. Two options belong
+ * to every platform besides its own: "policy" (the site's tightening of its
+ * usage policy) and "usage" (what the site says of itself: commercial,
+ * open_source, contract).
  */
-final class Config extends \ArrayObject
+final class Config extends \Omnisense\Contracts\Provider\Config
 {
-    /** Sets each key not set yet. */
-    public function defaults(array $defaults): self
-    {
-        foreach ($defaults as $key => $value) {
-            if (!$this->offsetExists($key)) {
-                $this[$key] = $value;
-            }
-        }
+    /** @var string */
+    public const PREFIX = 'omnifood';
 
-        return $this;
-    }
-
-    /** @param string[] $keys */
+    /** @param list<string> $keys */
     public function validateNotEmpty(array $keys): void
     {
         $missing = array_values(array_filter($keys, fn (string $key) => !isset($this[$key]) || '' === $this[$key] || [] === $this[$key]));
         if ($missing) {
-            throw new InvalidConfigException(\sprintf('The "%s" platform needs: %s.', $this['omnifood.factory_name'] ?? '?', implode(', ', $missing)));
+            throw new InvalidConfigException(\sprintf('The "%s" platform needs: %s.', $this->string('omnifood.factory_name') ?? '?', implode(', ', $missing)));
         }
     }
 
-    public function get(string $key, mixed $default = null): mixed
+    protected function invalid(string $message): \Throwable
     {
-        return $this->offsetExists($key) ? $this[$key] : $default;
+        return new InvalidConfigException($message);
     }
 }

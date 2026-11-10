@@ -93,6 +93,15 @@ shows when a call needs it (`InvalidConfigException`) - `capabilities()` needs n
 a back office rather than kept in the environment:
 `$registry->create('ubereats', ['client_id' => ..., 'client_secret' => ...])`.
 
+## Usage policies
+
+Omnifood is built on [omnisense/contracts](https://github.com/glitchr-omnisense/contracts): each
+platform package declares its usage policy as data (`policy.json`: rate limits, rights, where they
+were read), a site tightens it, and `$registry->guardedOrders('ubereats')` (and `guardedMenu()`,
+`guardedStore()`, `guardedReservations()`) refuses a call before it is sent once a limit is reached.
+Every `Api` honours the platform's 429 and `Retry-After`, and nothing retries a write - not even the
+application's HTTP client. See [docs/policies.md](docs/policies.md).
+
 ## Symfony
 
 `Omnifood\Bridge\Symfony\OmnifoodBundle` does that wiring in a Symfony application: every

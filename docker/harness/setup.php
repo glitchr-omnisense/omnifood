@@ -3,9 +3,10 @@
 /**
  * The harness's composer.json and phpunit.xml: this core from its checkout,
  * each platform from a checkout under /omnifood/plugins when there is one,
- * from GitHub (branch 1.x) otherwise; every package's tests in one run.
- * Files are rewritten only when they change, so the entrypoint knows when
- * to install.
+ * from GitHub (branch 1.x) otherwise, omnisense/contracts the same way from
+ * /omnisense/contracts; every package's tests in one run. /harness/packages/<slug>
+ * links to each package's directory (for PHPStan). Files are rewritten only
+ * when they change, so the entrypoint knows when to install.
  */
 $plugins = require __DIR__.'/plugins.php';
 $core = '/omnifood/core';
@@ -17,6 +18,29 @@ $require = ['omnisense/omnifood' => '1.x-dev'];
 $tests = ['Omnifood\\Tests\\' => "$core/Tests/"];
 $suites = ['core' => "$core/Tests"];
 $sources = [];
+@mkdir("$out/packages", 0775, true);
+$link = static function (string $slug, string $dir) use ($out): void {
+    if (!is_link("$out/packages/$slug") || readlink("$out/packages/$slug") !== $dir) {
+        @unlink("$out/packages/$slug");
+        symlink($dir, "$out/packages/$slug");
+    }
+};
+
+// omnisense/contracts, the kernel the family builds on: its checkout under /omnisense/contracts
+// (OMNISENSE_CONTRACTS in .env) when there is one, its tests run beside the family's; GitHub otherwise.
+$contracts = '/omnisense/contracts';
+$meta = is_file("$contracts/composer.json") ? json_decode((string) file_get_contents("$contracts/composer.json"), true) : null;
+if (($meta['name'] ?? null) === 'omnisense/contracts') {
+    $repositories[] = ['type' => 'path', 'url' => $contracts, 'options' => ['symlink' => true, 'versions' => ['omnisense/contracts' => '1.x-dev']]];
+    $tests['Omnisense\\Contracts\\Tests\\'] = "$contracts/Tests/";
+    $suites['contracts'] = "$contracts/Tests";
+    $sources['contracts'] = 'checkout';
+} else {
+    $repositories[] = ['type' => 'git', 'url' => 'https://github.com/glitchr-omnisense/contracts.git'];
+    $sources['contracts'] = 'github';
+}
+$require['omnisense/contracts'] = '1.x-dev';
+$link('core', $core);
 foreach ($plugins as $slug => [$testsNs]) {
     $name = "omnifood/$slug";
     $dir = "$local/$slug";
@@ -25,10 +49,12 @@ foreach ($plugins as $slug => [$testsNs]) {
         $repositories[] = ['type' => 'path', 'url' => $dir, 'options' => ['symlink' => true, 'versions' => [$name => '1.x-dev']]];
         $testDir = "$dir/Tests";
         $sources[$slug] = 'checkout';
+        $link($slug, $dir);
     } else {
         $repositories[] = ['type' => 'vcs', 'url' => "https://github.com/glitchr-omnisense/omnifood-$slug.git"];
         $testDir = "$out/vendor/omnifood/$slug/Tests";
         $sources[$slug] = 'github';
+        $link($slug, "$out/vendor/omnifood/$slug");
     }
     $require[$name] = '1.x-dev';
     $tests[$testsNs] = $testDir.'/';
@@ -47,6 +73,7 @@ $composer = [
         'symfony/http-client' => '^7.0|^8.0',
     ],
     'require-dev' => [
+        'phpstan/phpstan' => '^2.1',
         'phpunit/phpunit' => '^11.0',
         'symfony/config' => '^7.0|^8.0',
         'symfony/dependency-injection' => '^7.0|^8.0',

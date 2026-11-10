@@ -2,7 +2,11 @@
 
 namespace Omnifood;
 
+use Omnifood\Exception\UsageLimitReachedException;
 use Omnifood\Http\Redaction;
+use Omnisense\Contracts\Policy\Backoff;
+use Omnisense\Contracts\Policy\InMemoryRateLimiter;
+use Omnisense\Contracts\Policy\RateLimiterInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -15,6 +19,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * not given: the defaults stand. A credential is best not required here but
  * asked for when a call needs it, so that a platform without its keys still
  * answers what needs none (capabilities(), a webhook's signature check).
+ *
+ * Before build(), the Config holds the platform's Backoff
+ * ("omnifood.backoff", Config::backoff()), over the registry's limiter
+ * ("omnifood.limiter") or an in-memory one, as omnisense/contracts'
+ * ProviderFactory gives it: the platform's Api observes every answer with
+ * it (Http\Throttle), so that the waits the platform asks for hold its calls.
  */
 abstract class PlatformFactory implements PlatformFactoryInterface
 {
@@ -31,7 +41,15 @@ abstract class PlatformFactory implements PlatformFactoryInterface
     {
         try {
             $config = $this->createConfig($options);
-            $config->validateNotEmpty($config->get('omnifood.required_options', []));
+            $required = $config->get('omnifood.required_options', []);
+            $config->validateNotEmpty(\is_array($required) ? array_values(array_filter($required, 'is_string')) : []);
+            $limiter = $config->get('omnifood.limiter');
+            $config['omnifood.backoff'] = new Backoff(
+                $limiter instanceof RateLimiterInterface ? $limiter : new InMemoryRateLimiter(),
+                // The name it is configured under (the registry gives it): its wait is that platform's.
+                $config->string('omnifood.name') ?? $config->string('omnifood.factory_name') ?? static::class,
+                UsageLimitReachedException::class,
+            );
 
             return $this->build($config);
         } catch (\Throwable $e) {

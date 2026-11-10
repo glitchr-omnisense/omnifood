@@ -17,7 +17,11 @@ docker compose run --rm omnifood platforms
 ```
 
 The platforms come from GitHub (branch 1.x), or from the checkouts beside the core when
-`OMNIFOOD_PLUGINS=../..` is set in `.env` (the workspace layout).
+`OMNIFOOD_PLUGINS=../..` is set in `.env` (the workspace layout). omnisense/contracts, the kernel
+the family builds on, likewise: its checkout when `OMNISENSE_CONTRACTS` names it
+(`../../../omnisense-contracts` beside the family's folder), its tests then run with the family's;
+GitHub otherwise. The service runs on Docker's default bridge (`network_mode: bridge`) and names
+its entrypoint, so another family's harness image tagged `omnisense/omnifood-harness` serves.
 
 | Command | Does |
 |---|---|
@@ -32,6 +36,7 @@ The platforms come from GitHub (branch 1.x), or from the checkouts beside the co
 | `refresh <platform>`, `authorize <platform> <redirect-uri>` | tokens |
 | `bare` | plain PHP: the registry built by hand, an order read from a recorded answer, what PHP loaded |
 | `test` | every package's tests |
+| `phpstan` | PHPStan at level max on every package with a `phpstan.neon` (`phpstan-baseline.neon`: what was there when PHPStan came in, 2026-11-10; it may only shrink) |
 
 ## Keys
 

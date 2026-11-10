@@ -10,22 +10,32 @@
 #   docker compose run --rm omnifood notify ubereats body.json -H "X-Uber-Signature: ..."
 #   docker compose run --rm omnifood bare                        # plain PHP: no bundle, no container, and what PHP loaded
 #   docker compose run --rm omnifood test                        # every package's tests
+#   docker compose run --rm omnifood phpstan                     # PHPStan at level max on every package
 #
 # Platforms come from GitHub (branch 1.x) unless their checkout sits under
 # OMNIFOOD_PLUGINS (set it to ../.. in .env when this core sits in the
-# workspace beside them): then that checkout is what runs.
+# workspace beside them): then that checkout is what runs. omnisense/contracts
+# likewise: its checkout under OMNISENSE_CONTRACTS (../../../omnisense-contracts
+# in .env when it sits beside the family's folder), its tests run with the
+# family's; GitHub otherwise.
 name: omnifood-harness
 
 services:
   omnifood:
     build: .
     image: omnisense/omnifood-harness
+    # The image may be another family's harness tagged (the same PHP 8.4 Alpine with Composer): the
+    # entrypoint is named here, not taken from the image.
+    entrypoint: ["/omnifood/core/docker/entrypoint.sh"]
+    # One service, no server beside it: Docker's default bridge, no network of its own to create.
+    network_mode: bridge
     env_file:
       - path: .env
         required: false
     volumes:
       - ..:/omnifood/core
       - ${OMNIFOOD_PLUGINS:-./plugins}:/omnifood/plugins:ro
+      - ${OMNISENSE_CONTRACTS:-./contracts}:/omnisense/contracts:ro
       - harness:/harness
 
 volumes:

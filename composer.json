@@ -1,16 +1,36 @@
 {
     "name": "omnisense/omnifood",
     "type": "library",
-    "description": "Omnifood: one contract for the restaurant platforms - delivery orders (Uber Eats, Deliveroo, Just Eat) and table reservations (TheFork, Zenchef) - their menus, their stores, their webhooks, and its Symfony bundle.",
-    "keywords": ["restaurant", "food", "delivery", "orders", "reservations", "menu", "ubereats", "deliveroo", "justeat", "thefork", "zenchef", "omnifood"],
+    "description": "Omnifood: one contract for the restaurant platforms - delivery orders (Uber Eats, Deliveroo, Just Eat) and table reservations (TheFork, Zenchef) - their menus, their stores, their webhooks, on omnisense/contracts (usage policies, the platforms' waits honoured, never a write sent twice), under any PHP host; an optional Symfony bundle.",
+    "keywords": [
+        "restaurant",
+        "food",
+        "delivery",
+        "orders",
+        "reservations",
+        "menu",
+        "ubereats",
+        "deliveroo",
+        "justeat",
+        "thefork",
+        "zenchef",
+        "omnifood"
+    ],
     "license": "MIT",
-    "authors": [{"name": "Marco Meyer", "email": "marco.meyer@glitchr.io"}],
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
     "require": {
         "php": ">=8.2",
         "ext-mbstring": "*",
+        "omnisense/contracts": "^1.0@dev",
         "symfony/http-client-contracts": "^3.0"
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.0",
         "symfony/config": "^6.4|^7.0|^8.0",
         "symfony/dependency-injection": "^6.4|^7.0|^8.0",
@@ -32,11 +52,20 @@
         "symfony/http-kernel": "In a Symfony application: Omnifood\\Bridge\\Symfony\\OmnifoodBundle itself"
     },
     "autoload": {
-        "psr-4": {"Omnifood\\": ""},
-        "exclude-from-classmap": ["/Tests/", "/docker/"]
+        "psr-4": {
+            "Omnifood\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/",
+            "/docker/"
+        ]
     },
     "autoload-dev": {
-        "psr-4": {"Omnifood\\Tests\\": "Tests/"}
+        "psr-4": {
+            "Omnifood\\Tests\\": "Tests/"
+        }
     },
-    "config": {"sort-packages": true}
+    "config": {
+        "sort-packages": true
+    }
 }

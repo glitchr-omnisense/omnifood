@@ -81,6 +81,8 @@ answers written from the platform's public documentation, none was called live
 - [Configuration reference](configuration.md): the registry, keys typed in a back office, tokens
   and OAuth, every platform's options.
 - [Errors](errors.md): the exceptions and when each is thrown.
+- [Usage policies and rate limits](policies.md): each platform's terms as data, the guard, a 429,
+  and why no write is ever sent twice.
 - [Testing](testing.md): testing an application that uses Omnifood.
 - [The Docker harness](harness.md): every platform installed, a console to call them.
 - [Writing a platform](providers.md).

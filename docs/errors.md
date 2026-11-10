@@ -5,17 +5,19 @@ order: 50
 
 # Errors
 
-Every exception Omnifood throws on purpose implements `Omnifood\Exception\OmnifoodException` (a
-`\Throwable`):
+Every exception Omnifood throws on purpose implements `Omnifood\Exception\OmnifoodException`,
+which extends omnisense/contracts' `ExceptionInterface` (a `\Throwable`):
 
 | Exception | Extends | When |
 |---|---|---|
-| `InvalidConfigException` | `\LogicException` | a platform not configured, a factory not given to the registry, a required option missing, a key a call needs and finds empty (`The "ubereats" platform needs: store_id.`) |
+| `InvalidConfigException` | omnisense/contracts' `InvalidConfigException` (an `\InvalidArgumentException`, so a `\LogicException`) | a platform not configured, a factory not given to the registry, a required option missing, a key a call needs and finds empty (`The "ubereats" platform needs: store_id.`) |
 | `NotSupportedException` | `\LogicException` | the platform does not do that, or its public documentation does not show how: thrown before anything is sent (`The "justeat" platform does not read an order (...)`) |
 | `InvalidMenuException` | `\InvalidArgumentException` | `pushMenu()` found violations: nothing was sent. `platform`, `violations` (`list<Violation>`); the message joins them: `[deliveroo] path: message; path: message` |
 | `InvalidSignatureException` | `\RuntimeException` | a webhook whose signature, key or token does not hold, or whose body is not JSON. `platform`. Answer 401, handle nothing |
 | `ProviderException` | `\RuntimeException` | the platform refused, or could not be reached |
 | `UnauthorizedException` | `ProviderException` | the platform answered 401 or 403: the keys refused, a scope missing, the account to connect again |
+| `RateLimitedException` | `ProviderException` | the platform answered 429: `status` 429, `retryAfter` (seconds, from `Retry-After` or `RateLimit`, when given). Never retried; the platform's next calls wait as long ([Usage policies](policies.md)) |
+| `UsageLimitReachedException` | omnisense/contracts' `UsageLimitReached` (a `\RuntimeException`) | refused before anything was sent: a limit of the platform's usage policy reached (a guarded platform), or the platform's wait not over. `retryAfter`, `limit` |
 
 Outside the family's exceptions: `Hours`' constructor throws `\InvalidArgumentException` for a
 day, a time or a range it cannot read ([Concepts](concepts.md#hours)); TheFork's
@@ -82,7 +84,7 @@ either: they held the options, credentials included.
 | Where | Catch |
 |---|---|
 | a webhook controller | `InvalidSignatureException`: answer 401; `InvalidConfigException`: the secret is not configured, answer 500 so that the platform retries once it is |
-| accepting an order | `ProviderException`: the delay runs (`acceptanceDelay`), retry soon, then tell the kitchen; `UnauthorizedException`: alert someone |
+| accepting an order | `UsageLimitReachedException`: nothing was sent, try again after `retryAfter`; `RateLimitedException`: refused, nothing done, the same; `ProviderException` (a 5xx, a timeout): the acceptance may have reached the platform - read the order (`order()`) before sending it again, within the delay (`acceptanceDelay`), then tell the kitchen; `UnauthorizedException`: alert someone |
 | pushing a menu | `InvalidMenuException`: show its `violations` in the back office; `ProviderException` |
 | a feature a platform may lack | check the interface (`instanceof`) and `capabilities()` first; `NotSupportedException` is a programming error |
 | building the registry, a deploy | `InvalidConfigException`: a configuration error, to fix, not to retry |
