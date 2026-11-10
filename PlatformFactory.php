@@ -3,6 +3,7 @@
 namespace Omnifood;
 
 use Omnifood\Exception\UsageLimitReachedException;
+use Omnifood\Http\NoRetry;
 use Omnifood\Http\Redaction;
 use Omnisense\Contracts\Policy\Backoff;
 use Omnisense\Contracts\Policy\InMemoryRateLimiter;
@@ -25,11 +26,19 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * ("omnifood.limiter") or an in-memory one, as omnisense/contracts'
  * ProviderFactory gives it: the platform's Api observes every answer with
  * it (Http\Throttle), so that the waits the platform asks for hold its calls.
+ *
+ * The HTTP client given is kept with its retries off (Http\NoRetry, the
+ * kernel's since omnisense/contracts 1568f2c): an application's own
+ * platform, whose Api does not call NoRetry itself, never sends an order's
+ * acceptance twice through Symfony's RetryableHttpClient either.
  */
 abstract class PlatformFactory implements PlatformFactoryInterface
 {
-    public function __construct(protected readonly ?HttpClientInterface $http = null)
+    protected readonly ?HttpClientInterface $http;
+
+    public function __construct(?HttpClientInterface $http = null)
     {
+        $this->http = null !== $http ? NoRetry::of($http) : null;
     }
 
     public function getName(): string

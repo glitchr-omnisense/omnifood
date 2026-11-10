@@ -31,7 +31,9 @@ use Omnisense\Contracts\Policy\UsagePolicy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpClient\Retry\GenericRetryStrategy;
 use Symfony\Component\HttpClient\RetryableHttpClient;
+use Symfony\Component\HttpClient\TraceableHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -183,6 +185,38 @@ final class PolicyTest extends TestCase
         self::assertSame($this->http()::class, NoRetry::of($this->http())::class, 'a client with no retry is kept as given');
     }
 
+    /**
+     * As framework.http_client builds it with retry_failed on (TraceableHttpClient over a
+     * RetryableHttpClient), Symfony's default statuses without the wait: an acceptance answered
+     * 503 then 200 is sent once - by the factory alone, whose platform's Api does not call
+     * NoRetry itself (an application's own platform).
+     */
+    public function testAnAcceptanceAnswered503IsSentOnceThroughTheFrameworksRetryingClient(): void
+    {
+        $this->answers = [new MockResponse('{"error":"unavailable"}', ['http_code' => 503]), new MockResponse('{}')];
+        $retrying = new TraceableHttpClient(new RetryableHttpClient($this->http(), new GenericRetryStrategy(GenericRetryStrategy::DEFAULT_RETRY_STATUS_CODES, 0), 3));
+        $platform = (new UnwrappedFactory($retrying))->create();
+        \assert($platform instanceof OrdersInterface);
+
+        try {
+            $platform->accept('o-1');
+        } catch (\Throwable) {
+        }
+        self::assertCount(1, $this->sent, 'sent once');
+        self::assertCount(1, $this->answers, 'the 200 was never asked for');
+    }
+
+    public function testAMockHttpClientIsKeptAsGiven(): void
+    {
+        $mock = new MockHttpClient([new MockResponse('{}')]);
+        self::assertSame($mock, NoRetry::of($mock), 'not a copy: getRequestsCount() still counts');
+
+        $platform = (new UnwrappedFactory($mock))->create();
+        \assert($platform instanceof OrdersInterface);
+        $platform->accept('o-1');
+        self::assertSame(1, $mock->getRequestsCount());
+    }
+
     public function testThrottleWithoutABackoffStillRefusesA429(): void
     {
         Throttle::before(null);
@@ -229,6 +263,20 @@ final class PoliciedFactory extends PlatformFactory
     protected function build(Config $config): PlatformInterface
     {
         return new PoliciedKitchen(NoRetry::of($this->http ?? new MockHttpClient()), $config->backoff());
+    }
+}
+
+/** An application's own platform: its Api sends with the factory's client as it is. */
+final class UnwrappedFactory extends PlatformFactory
+{
+    protected function populate(Config $config): void
+    {
+        $config->defaults(['omnifood.factory_name' => 'unwrapped']);
+    }
+
+    protected function build(Config $config): PlatformInterface
+    {
+        return new PoliciedKitchen($this->http ?? new MockHttpClient(), $config->backoff());
     }
 }
 

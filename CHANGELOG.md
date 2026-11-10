@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `Http\NoRetry::of()` is omnisense/contracts' `Http\NoRetry::of()` when the kernel has it (from
+  contracts 1568f2c, which brings the shared protection); with an older kernel in a site's vendor,
+  omnifood's former code runs. Same name, same signature.
+- `PlatformFactory` keeps the HTTP client it is given with its retries off (`Http\NoRetry`): an
+  application's own platform, whose Api does not call NoRetry, never sends an order's acceptance
+  twice through Symfony's `RetryableHttpClient` either. `$http` stays a protected readonly property.
+
+### Fixed
+
+- `Http\NoRetry` kept a `MockHttpClient` as a copy (it takes any option), whose
+  `getRequestsCount()` a test no longer saw: it is kept as given now, in the fallback too.
+  `Tests/PolicyTest`: an acceptance answered 503 then 200 through Traceable over Retryable sent
+  once by the factory alone, a `MockHttpClient` kept as given.
+
 ### Added
 
 - omnisense/omnifood is built on omnisense/contracts, the kernel of the omni families, with its
