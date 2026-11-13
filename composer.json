@@ -26,10 +26,15 @@
     "require": {
         "php": ">=8.2",
         "ext-mbstring": "*",
-        "omnisense/contracts": "^1.0@dev",
+        "omnisense/contracts": "^1.0",
         "symfony/http-client-contracts": "^3.0"
     },
     "require-dev": {
+        "omnifood/deliveroo": "^1.0@dev",
+        "omnifood/justeat": "^1.0@dev",
+        "omnifood/thefork": "^1.0@dev",
+        "omnifood/ubereats": "^1.0@dev",
+        "omnifood/zenchef": "^1.0@dev",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.0",
         "symfony/config": "^6.4|^7.0|^8.0",
@@ -67,5 +72,10 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-1.x": "1.x-dev"
+        }
     }
 }

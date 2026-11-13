@@ -72,10 +72,9 @@ Guarded or not, each platform's `Api` honours the waits the platform asks for:
   Symfony's `RetryableHttpClient` (`framework.http_client`'s `retry_failed`) retries a 429, 423,
   425, 502 and 503 whatever the method; each `Api` sends with its retries off
   (`Omnifood\Http\NoRetry`: `max_retries: 0`, through the decorators), and so does every
-  `PlatformFactory`, so an application's own platform is covered too. Since omnisense/contracts
-  1568f2c, `Omnifood\Http\NoRetry` is the kernel's (`Omnisense\Contracts\Http\NoRetry`); with an
-  older kernel, omnifood's own code still turns the retries off. A `MockHttpClient` is kept as
-  given (not copied: `getRequestsCount()` still counts).
+  `PlatformFactory`, so an application's own platform is covered too. `Omnifood\Http\NoRetry` is
+  the kernel's (`Omnisense\Contracts\Http\NoRetry`). A `MockHttpClient` is kept as given (not
+  copied: `getRequestsCount()` still counts).
 
 No platform offers an idempotency key on its writes - Uber Eats' `accept_pos_order`, Deliveroo's
 order status (it "should be called only once per order"), JET Connect's callbacks, TheFork's

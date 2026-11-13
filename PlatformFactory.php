@@ -28,7 +28,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * it (Http\Throttle), so that the waits the platform asks for hold its calls.
  *
  * The HTTP client given is kept with its retries off (Http\NoRetry, the
- * kernel's since omnisense/contracts 1568f2c): an application's own
+ * kernel's): an application's own
  * platform, whose Api does not call NoRetry itself, never sends an order's
  * acceptance twice through Symfony's RetryableHttpClient either.
  */

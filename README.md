@@ -62,36 +62,64 @@ None of these platforms gives credentials without a partner agreement: every pac
 from the platform's public documentation and tested against recorded answers (`MockHttpClient`),
 **not verified against the live APIs**. Each README says what to ask for.
 
-## Install
+## Install and a first call
 
 ```sh
-composer require omnisense/omnifood omnifood/ubereats omnifood/deliveroo omnifood/justeat omnifood/thefork
+composer require omnisense/omnifood omnifood/ubereats
 ```
 
-## Plain PHP
+```php
+<?php
+
+require __DIR__.'/vendor/autoload.php';
+
+use Omnifood\Registry;
+use Omnifood\UberEats\UberEatsPlatformFactory;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
+
+// Uber's two answers (a token, then the order), recorded: no account, and nothing leaves the process.
+$http = new MockHttpClient(static fn (string $method, string $url) => new MockResponse(str_contains($url, '/oauth/')
+    ? '{"access_token": "recorded", "expires_in": 3600}'
+    : '{"order": {"id": "o-1", "display_id": "A1B2C", "state": "OFFERED", "fulfillment_type": "DELIVERY_BY_UBER",
+        "carts": [{"items": [{"id": "ramen", "title": "Shoyu ramen", "quantity": {"amount": 2}}]}]}}'));
+$registry = new Registry([new UberEatsPlatformFactory($http)], [
+    'ubereats' => ['factory' => 'ubereats', 'options' => ['client_id' => 'id', 'client_secret' => 'secret', 'store_id' => 'store-1']],
+]);
+
+$order = $registry->get('ubereats')->order('o-1');
+echo '#', $order->displayId, ' ', $order->status->value, ': ', $order->lines[0]->quantity, ' x ', $order->lines[0]->name, "\n";
+// #A1B2C new: 2 x Shoyu ramen
+```
+
+No account for this first call: Uber's answers are recorded (Symfony's `MockHttpClient` answers in
+place of the API), so nothing leaves the process. **Every platform needs an account for a real
+call**, and none gives one without a partner agreement: Uber Eats' Marketplace APIs (a Developer
+Dashboard application: client id and secret, the store's id), Deliveroo's Partner Platform, Just
+Eat Takeaway's JET Connect, TheFork's partner API, Zenchef's (on request). Each platform's README
+says what to ask for. With the keys, the client is the real one (`HttpClient::create()`, or the
+application's) and the options come from the environment.
+
+Every platform:
+
+```sh
+composer require omnisense/omnifood omnifood/ubereats omnifood/deliveroo omnifood/justeat omnifood/thefork omnifood/zenchef
+```
 
 ```php
-use Omnifood\Registry;
-use Omnifood\TheFork\TheForkPlatformFactory;
-use Omnifood\UberEats\UberEatsPlatformFactory;
-use Symfony\Component\HttpClient\HttpClient;
-
-$http = HttpClient::create();   // or the application's client; a MockHttpClient in a test
 $registry = new Registry([new UberEatsPlatformFactory($http), new TheForkPlatformFactory($http)], [
     'ubereats' => ['factory' => 'ubereats', 'options' => ['client_id' => '...', 'client_secret' => '...', 'store_id' => '...']],
     'thefork' => ['factory' => 'thefork', 'options' => ['client_id' => '...', 'client_secret' => '...', 'restaurant_id' => '...']],
 ]);
-$ubereats = $registry->get('ubereats');
 $registry->orders();        // the platforms that take orders
 $registry->reservations();  // the ones that take reservations
 ```
 
-No bundle, no container: a factory per platform package, the registry built by hand.
-[docs/installation.md](docs/installation.md) opens on a whole script that runs as it is, on a
-recorded answer. A platform is built the first time it is asked for, and a key left empty only
-shows when a call needs it (`InvalidConfigException`) - `capabilities()` needs none. Keys typed in
-a back office rather than kept in the environment:
-`$registry->create('ubereats', ['client_id' => ..., 'client_secret' => ...])`.
+No bundle, no container: a factory per platform package, the registry built by hand. The whole
+script and the rest: [docs/installation.md](docs/installation.md). A platform is built the first
+time it is asked for, and a key left empty only shows when a call needs it
+(`InvalidConfigException`) - `capabilities()` needs none. Keys typed in a back office rather than
+kept in the environment: `$registry->create('ubereats', ['client_id' => ..., 'client_secret' => ...])`.
 
 ## Usage policies
 

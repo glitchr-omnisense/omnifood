@@ -2,11 +2,23 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-13
+
+The first stable release.
+
+### Release
+
+- Requires `omnisense/contracts: ^1.0`: stable versions, so `composer require omnisense/omnifood`
+  installs in a project at Composer's default minimum-stability. `extra.branch-alias` names 1.x
+  (`1.x-dev`); the CI (`.github/workflows/ci.yml`, glitchr-studio/ci's php-package.yml) is callable, and
+  `release.yml` runs it on a tag before glitchr-studio/ci's php-release.yml.
+- The fallback kept in `Http\NoRetry` for an omnisense/contracts older than 1568f2c is gone:
+  contracts 1.0 has the kernel's `NoRetry`.
+
 ### Changed
 
-- `Http\NoRetry::of()` is omnisense/contracts' `Http\NoRetry::of()` when the kernel has it (from
-  contracts 1568f2c, which brings the shared protection); with an older kernel in a site's vendor,
-  omnifood's former code runs. Same name, same signature.
+- `Http\NoRetry::of()` is omnisense/contracts' `Http\NoRetry::of()` (the shared protection). Same
+  name, same signature.
 - `PlatformFactory` keeps the HTTP client it is given with its retries off (`Http\NoRetry`): an
   application's own platform, whose Api does not call NoRetry, never sends an order's acceptance
   twice through Symfony's `RetryableHttpClient` either. `$http` stays a protected readonly property.
@@ -14,7 +26,7 @@
 ### Fixed
 
 - `Http\NoRetry` kept a `MockHttpClient` as a copy (it takes any option), whose
-  `getRequestsCount()` a test no longer saw: it is kept as given now, in the fallback too.
+  `getRequestsCount()` a test no longer saw: it is kept as given now.
   `Tests/PolicyTest`: an acceptance answered 503 then 200 through Traceable over Retryable sent
   once by the factory alone, a `MockHttpClient` kept as given.
 
